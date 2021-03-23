@@ -2,8 +2,10 @@ package com.example.demo.web;
 
 import com.example.demo.dto.Customer;
 import com.example.demo.dto.CustomerProjection;
+import com.example.demo.dto.MyOrder;
 import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.CustomerSpecificationRepository;
+import com.example.demo.repositories.MyOrderRepository;
 import com.example.demo.util.SpecificationFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +35,9 @@ public class CustomerController {
     @Autowired
     private CustomerRepository repository;
 
+    @Autowired
+    private MyOrderRepository myOrderRepository;
+
     /**
      * 初始化数据
      */
@@ -44,6 +50,25 @@ public class CustomerController {
         repository.save(new Customer("David", "Palmer"));
         repository.save(new Customer("Michelle", "Dessler"));
         repository.save(new Customer("Bauer", "Dessler"));
+
+    }
+
+    @RequestMapping("/index2")
+    public void index2() {
+        Customer customer = repository.findById(1);
+        MyOrder myOrder1 = new MyOrder();
+        myOrder1.setId(1L);
+        myOrder1.setCode("RTX 3060");
+        myOrder1.setTotal(new BigDecimal(2500));
+        myOrder1.setCustomer(customer);
+        myOrderRepository.save(myOrder1);
+        MyOrder myOrder2 = new MyOrder();
+        myOrder2.setId(2L);
+        myOrder2.setCode("RTX 3070");
+        myOrder2.setTotal(new BigDecimal(3500));
+        myOrder2.setCustomer(customer);
+        myOrderRepository.save(myOrder2);
+
     }
 
     /**

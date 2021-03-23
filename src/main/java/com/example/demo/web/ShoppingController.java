@@ -2,18 +2,25 @@ package com.example.demo.web;
 
 import com.example.demo.dto.Customer;
 import com.example.demo.dto.MyOrder;
+import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.MyOrderRepository;
 import com.example.demo.util.SpecificationFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PrePersist;
 import javax.persistence.criteria.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +32,10 @@ import java.util.List;
 public class ShoppingController {
     @Autowired
     private MyOrderRepository myOrderRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @PersistenceContext
+    private EntityManager em;
 
     /**
      * 内连接查询
@@ -150,4 +161,20 @@ public class ShoppingController {
         }
     }
 
+
+
+    @RequestMapping("/q6")
+    @Transactional
+    public void specification6() {
+
+         Customer myCustomer = customerRepository.findById(1);
+
+        List<MyOrder> myOrders = myCustomer.getMyOrders();
+        MyOrder myOrder1 = myOrders.get(1);
+        myOrder1.setTotal(myOrder1.getTotal().add(new BigDecimal(200)));
+em.persist(myCustomer);
+
+
+
+    }
 }

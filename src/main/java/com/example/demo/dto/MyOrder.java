@@ -3,6 +3,7 @@ package com.example.demo.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sun.util.calendar.CalendarUtils;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -19,12 +20,11 @@ public class MyOrder {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String code;
-    private Long cId;
     private BigDecimal total;
 
     //实体映射重复列必须设置：insertable = false,updatable = false
-    @OneToOne
-    @JoinColumn(name = "cId", insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name="customer_id", referencedColumnName = "id")
     private Customer customer;
 
     @Override
@@ -32,7 +32,6 @@ public class MyOrder {
         return "MyOrder{" +
                 "id=" + id +
                 ", code='" + code + '\'' +
-                ", cId=" + cId +
                 ", total=" + total +
                 ", customer=" + customer +
                 '}';

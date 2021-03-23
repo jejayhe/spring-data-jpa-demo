@@ -21,8 +21,7 @@ public class Customer {
     private String lastName;
 
     //一对多，一个客户对应多个订单，关联的字段是订单里的cId字段
-    @OneToMany
-    @JoinColumn(name = "cId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="customer", fetch = FetchType.EAGER)
     private List<MyOrder> myOrders;
 
     public Customer(String firstName, String lastName) {

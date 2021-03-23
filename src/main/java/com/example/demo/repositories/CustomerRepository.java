@@ -20,6 +20,7 @@ import java.util.List;
 import static org.hibernate.jpa.QueryHints.HINT_COMMENT;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    Customer findById(long id);
     /**
      * 根据lastName查询结果
      * @param lastName
