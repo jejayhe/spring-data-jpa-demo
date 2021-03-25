@@ -1,5 +1,6 @@
 package com.example.demo.web;
 
+import com.example.demo.config.LocalCache;
 import com.example.demo.dto.Customer;
 import com.example.demo.dto.MyOrder;
 import com.example.demo.repositories.CustomerRepository;
@@ -28,7 +29,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.demo.config.LocalCache.CustomerLocalCache;
+//import static com.example.demo.config.LocalCache.CustomerLocalCache;
 
 /**
  * Created by Administrator on 2017/7/17 0017.
@@ -42,6 +43,8 @@ public class ShoppingController {
     private CustomerRepository customerRepository;
     @PersistenceContext
     private EntityManager em;
+//    @Autowired
+//    private LocalCache localCache;
 
     @Resource
     private RedisTemplate<String, String> redisTemplate;
@@ -225,7 +228,8 @@ public class ShoppingController {
 
     @RequestMapping("/getFromCache/{id}")
     public @ResponseBody String getFromCache(@PathVariable Long id){
-        return CustomerLocalCache.get(id);
+        return LocalCache.getInstance().CustomerLocalCache.get(id);
+//        return localCache.getInstance().getCustomerDao(id);
     }
 
 }
