@@ -12,10 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PrePersist;
@@ -36,6 +38,9 @@ public class ShoppingController {
     private CustomerRepository customerRepository;
     @PersistenceContext
     private EntityManager em;
+
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 内连接查询
@@ -172,9 +177,41 @@ public class ShoppingController {
         List<MyOrder> myOrders = myCustomer.getMyOrders();
         MyOrder myOrder1 = myOrders.get(1);
         myOrder1.setTotal(myOrder1.getTotal().add(new BigDecimal(200)));
-em.persist(myCustomer);
+        em.persist(myCustomer);
 
 
 
     }
+    // read from cache
+    @RequestMapping("/q7")
+    @Transactional
+    public void specification7() {
+
+        Customer myCustomer = customerRepository.findById(1);
+
+        List<MyOrder> myOrders = myCustomer.getMyOrders();
+        MyOrder myOrder1 = myOrders.get(1);
+        myOrder1.setTotal(myOrder1.getTotal().add(new BigDecimal(200)));
+
+
+        em.persist(myCustomer);
+
+
+
+    }
+
+    @RequestMapping("/cache1")
+    public void cache1(){
+        System.out.println(redisTemplate.opsForValue().get("k1"));
+//        redisTemplate.opsForValue().set("k1", "v2");
+    }
+
+    @RequestMapping("/cache2")
+    public void cache2(){
+//        System.out.println(redisTemplate.opsForValue().get("k1"));
+//        redisTemplate.opsForValue().set("k1", "v2");
+        redisTemplate.opsForValue().set("k1", "v1");
+    }
+
+
 }
