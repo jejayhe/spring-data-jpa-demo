@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class MyOrder {
 
     //实体映射重复列必须设置：insertable = false,updatable = false
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name="customer_id", referencedColumnName = "id")
     private Customer customer;
 

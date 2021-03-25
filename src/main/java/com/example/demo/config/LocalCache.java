@@ -1,23 +1,21 @@
 package com.example.demo.config;
 
-import com.alibaba.fastjson.JSON;
+
 import com.example.demo.dto.Customer;
 import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.MyOrderRepository;
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 @Component
 @RequiredArgsConstructor
 public class LocalCache {
@@ -27,6 +25,8 @@ public class LocalCache {
     @Autowired
     private  CustomerRepository customerRepository;
     private static ApplicationContext applicationContext;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public LoadingCache<Long, String> CustomerLocalCache;
 //    public static Function<Long, String> getCustomer(Long id){
@@ -34,9 +34,27 @@ public class LocalCache {
 //        return t -> {
 //        return JSON.toJSONString(myCustomer);};
 //    }
-    public String getCustomerDao(Long id){
-        return JSON.toJSONString(customerRepository.findById(id));
+    public String getCustomerDao(Long id) throws Exception{
+        // if redis success, return
+
+        // if redis fails
+        Customer customer = customerRepository.findById(id);
+        // set redis
+        ObjectMapper mapper = new ObjectMapper();
+        //Converting the Object to JSONString
+//        String jsonString = mapper.writeValueAsString(std);
+        redisTemplate.opsForValue().set("customer:"+id.toString(), mapper.writeValueAsString(customer), 60, TimeUnit.SECONDS);
+//        redisTemplate.opsForValue().set("customer:"+id.toString(), "{\"id\":1,\"firstName\":\"Jack\",\"lastName\":\"Bauer\"}", 60, TimeUnit.SECONDS);
+        return mapper.writeValueAsString(customer);
+//        return "haha";
     }
+//    public String setCustomerDao(Long id){
+//        // if redis fails
+//        Customer customer = customerRepository.findById(id);
+//        // sleep 20 ms
+//        // delete
+//        return JSON.toJSONString(customerRepository.findById(id));
+//    }
 
     public static LocalCache instance = null;
 

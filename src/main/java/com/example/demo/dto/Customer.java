@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class Customer {
 
     //一对多，一个客户对应多个订单，关联的字段是订单里的cId字段
     @OneToMany(cascade = CascadeType.ALL, mappedBy="customer", fetch = FetchType.EAGER)
+    @JsonBackReference
     private List<MyOrder> myOrders;
 
     public Customer(String firstName, String lastName) {
