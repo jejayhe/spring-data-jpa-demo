@@ -15,7 +15,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
@@ -25,6 +27,8 @@ import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.demo.config.LocalCache.CustomerLocalCache;
 
 /**
  * Created by Administrator on 2017/7/17 0017.
@@ -212,6 +216,16 @@ public class ShoppingController {
 //        redisTemplate.opsForValue().set("k1", "v2");
         redisTemplate.opsForValue().set("k1", "v1");
     }
+    @RequestMapping("/updateOrder")
+    public void updateOrder(){
+        Customer myCustomer = customerRepository.findById(1);
+//        List<MyOrder> myOrders = myCustomer.getMyOrders();
 
+    }
+
+    @RequestMapping("/getFromCache/{id}")
+    public @ResponseBody String getFromCache(@PathVariable Long id){
+        return CustomerLocalCache.get(id);
+    }
 
 }
