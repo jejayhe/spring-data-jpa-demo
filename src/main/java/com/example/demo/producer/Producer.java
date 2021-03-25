@@ -17,10 +17,16 @@ public class Producer {
     @Autowired
     private Topic testTopic;
 
+    @Autowired
+    private Topic customerTopic;
+
 
 
     public void sendTopicText(String msg)  {
         this.jmsMessagingTemplate.convertAndSend(this.testTopic, msg);
+    }
+    public void sendTopicCustomer(String msg)  {
+        this.jmsMessagingTemplate.convertAndSend(this.customerTopic, msg);
     }
 
 }

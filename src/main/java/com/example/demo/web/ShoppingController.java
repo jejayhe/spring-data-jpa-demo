@@ -232,4 +232,11 @@ public class ShoppingController {
 //        return localCache.getInstance().getCustomerDao(id);
     }
 
+    @RequestMapping("/updateFromCache/{id}")
+    public @ResponseBody String updateFromCache(@PathVariable Long id) throws Exception{
+        LocalCache.getInstance().setCustomerDao(id);
+        return "finished";
+//        return localCache.getInstance().getCustomerDao(id);
+    }
+
 }

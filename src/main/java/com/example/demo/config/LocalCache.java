@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 
 import com.example.demo.dto.Customer;
+import com.example.demo.producer.Producer;
 import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.MyOrderRepository;
 import com.example.demo.vo.CustomerVo;
@@ -30,6 +31,9 @@ public class LocalCache {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private Producer producer;
+
     public LoadingCache<Long, String> CustomerLocalCache;
 //    public static Function<Long, String> getCustomer(Long id){
 ////        return t -> new Date().toString();
@@ -56,13 +60,13 @@ public class LocalCache {
         return mapper.writeValueAsString(customer);
 //        return "haha";
     }
-//    public String setCustomerDao(Long id){
-//        // if redis fails
-//        Customer customer = customerRepository.findById(id);
-//        // sleep 20 ms
-//        // delete
-//        return JSON.toJSONString(customerRepository.findById(id));
-//    }
+    public void setCustomerDao(Long id) throws InterruptedException{
+        ObjectMapper mapper = new ObjectMapper();
+        Thread.sleep(20);
+        // delete cache from redis and local
+        redisTemplate.delete("customer:"+id.toString());
+        producer.sendTopicCustomer(id.toString());
+    }
 
     public static LocalCache instance = null;
 
@@ -76,7 +80,7 @@ public class LocalCache {
     private void init(){
         CustomerLocalCache = Caffeine.newBuilder()
                 .maximumSize(3)
-                .expireAfterWrite(5, TimeUnit.SECONDS)
+                .expireAfterWrite(10, TimeUnit.SECONDS)
                 .build(k -> getCustomerDao(k));
     }
     @Autowired

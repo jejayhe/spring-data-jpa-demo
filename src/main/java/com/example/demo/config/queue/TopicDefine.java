@@ -10,4 +10,8 @@ public class TopicDefine {
     public javax.jms.Topic testTopic() {
         return new ActiveMQTopic("test.topic");
     }
+    @Bean(name = "customerTopic")
+    public javax.jms.Topic customerTopic() {
+        return new ActiveMQTopic("customer.topic");
+    }
 }
