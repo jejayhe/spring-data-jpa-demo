@@ -10,15 +10,15 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class LocalCacheConfig {
-    @Bean
-    public Caffeine caffeineConfig() {
-        return Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES);
-    }
-
-    @Bean
-    public CacheManager cacheManager(Caffeine caffeine) {
-        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-        caffeineCacheManager.setCaffeine(caffeine);
-        return caffeineCacheManager;
-    }
+//    @Bean
+//    public Caffeine caffeineConfig() {
+//        return Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.SECONDS);
+//    }
+//
+//    @Bean
+//    public CacheManager cacheManager(Caffeine caffeine) {
+//        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+//        caffeineCacheManager.setCaffeine(caffeine);
+//        return caffeineCacheManager;
+//    }
 }
