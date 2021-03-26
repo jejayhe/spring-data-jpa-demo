@@ -1,8 +1,7 @@
 # spring-data-jpa-demo
 一个关于Spring-data-JPA使用的demo
 
-与Demo相匹配的文章可以见诸于我的个人博客：
-[http://www.icnws.com](http://www.icnws.com)
+
 
 1、[Spring Data JPA系列：基本配置](http://www.icnws.com/2017/spring-data-jpa-basic-config/)
 
