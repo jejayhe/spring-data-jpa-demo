@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 @Component
 @RequiredArgsConstructor
@@ -33,6 +37,31 @@ public class LocalCache {
 
     @Autowired
     private Producer producer;
+
+    private static ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+    public class RedisOpExecutable implements Runnable {
+        private String key;
+        private String val;
+        private String op;
+        public RedisOpExecutable(String op, String key, String val){
+            this.op=op;
+            this.key=key;
+            this.val=val;
+        }
+        public RedisOpExecutable(String op, String key){
+            this.op=op;
+            this.key=key;
+        }
+        @Override
+        public void run(){
+            if (this.op.equals("set")) {
+                redisTemplate.opsForValue().set(key, val, 60, TimeUnit.SECONDS);
+            } else if (op.equals("del")){
+                redisTemplate.delete(key);
+            }
+        }
+    }
 
     public LoadingCache<Long, String> CustomerLocalCache;
 //    public static Function<Long, String> getCustomer(Long id){
@@ -55,7 +84,8 @@ public class LocalCache {
 
         //Converting the Object to JSONString
 //        String jsonString = mapper.writeValueAsString(std);
-        redisTemplate.opsForValue().set("customer:"+id.toString(), mapper.writeValueAsString(customer), 60, TimeUnit.SECONDS);
+        executorService.execute(new RedisOpExecutable("set", "customer:"+id.toString(), mapper.writeValueAsString(customer)));
+//        redisTemplate.opsForValue().set("customer:"+id.toString(), mapper.writeValueAsString(customer), 60, TimeUnit.SECONDS);
 //        redisTemplate.opsForValue().set("customer:"+id.toString(), "{\"id\":1,\"firstName\":\"Jack\",\"lastName\":\"Bauer\"}", 60, TimeUnit.SECONDS);
         return mapper.writeValueAsString(customer);
 //        return "haha";
@@ -64,7 +94,8 @@ public class LocalCache {
         ObjectMapper mapper = new ObjectMapper();
         Thread.sleep(20);
         // delete cache from redis and local
-        redisTemplate.delete("customer:"+id.toString());
+//        redisTemplate.delete("customer:"+id.toString());
+        executorService.execute(new RedisOpExecutable("del", "customer:"+id.toString()));
         producer.sendTopicCustomer(id.toString());
     }
 

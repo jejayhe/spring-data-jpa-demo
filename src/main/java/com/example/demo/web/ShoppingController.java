@@ -202,6 +202,7 @@ public class ShoppingController {
 
 
         em.persist(myCustomer);
+       
 
 
 
