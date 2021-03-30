@@ -36,7 +36,7 @@ public class Consumer {
         System.out.println("线程ID = " + Thread.currentThread().getId());
         System.out.println("消费者接受Customer信息：" + text);
         Long id = Long.valueOf(text);
-        LocalCache.getInstance().CustomerLocalCache.invalidate(id);
+        LocalCache.getInstance().CustomerLocalCache.synchronous().invalidate(id);
     }
 
 }

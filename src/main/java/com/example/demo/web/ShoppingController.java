@@ -228,8 +228,8 @@ public class ShoppingController {
     }
 
     @RequestMapping("/getFromCache/{id}")
-    public @ResponseBody String getFromCache(@PathVariable Long id){
-        return LocalCache.getInstance().CustomerLocalCache.get(id);
+    public @ResponseBody String getFromCache(@PathVariable Long id) throws Exception{
+        return LocalCache.getInstance().CustomerLocalCache.get(id).get();
 //        return localCache.getInstance().getCustomerDao(id);
     }
 

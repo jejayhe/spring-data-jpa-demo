@@ -7,6 +7,8 @@ import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.MyOrderRepository;
 import com.example.demo.vo.CustomerVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -14,18 +16,17 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+
 @Component
 @RequiredArgsConstructor
-public class LocalCache {
+public class LocalCache implements ApplicationContextAware {
 
     @Autowired
     private MyOrderRepository myOrderRepository;
@@ -38,7 +39,7 @@ public class LocalCache {
     @Autowired
     private Producer producer;
 
-    private static ExecutorService executorService = Executors.newFixedThreadPool(3);
+    private static ExecutorService executorService = new ThreadPoolExecutor(0, 50, 60L, TimeUnit.SECONDS, new SynchronousQueue());
 
     public class RedisOpExecutable implements Runnable {
         private String key;
@@ -63,32 +64,38 @@ public class LocalCache {
         }
     }
 
-    public LoadingCache<Long, String> CustomerLocalCache;
+    public AsyncLoadingCache<Long, String> CustomerLocalCache;
 //    public static Function<Long, String> getCustomer(Long id){
 ////        return t -> new Date().toString();
 //        return t -> {
 //        return JSON.toJSONString(myCustomer);};
 //    }
     public String getCustomerDao(Long id) throws Exception{
-        ObjectMapper mapper = new ObjectMapper();
-        // if redis success, return
-        Object val = redisTemplate.opsForValue().get("customer:"+id.toString());
-        System.out.println("read redis:"+ Objects.toString(val));
-        if (val!=null){
-            CustomerVo c = mapper.readValue(((String)val).getBytes(), CustomerVo.class);
-            return mapper.writeValueAsString(c);
+//        ObjectMapper mapper = new ObjectMapper();
+//        // if redis success, return
+//        Object val = redisTemplate.opsForValue().get("customer:"+id.toString());
+//        System.out.println("read redis:"+ Objects.toString(val));
+//        if (val!=null){
+//            CustomerVo c = mapper.readValue(((String)val).getBytes(), CustomerVo.class);
+//            return mapper.writeValueAsString(c);
+//        }
+//        // if redis fails
+//        Customer customer = customerRepository.findById(id);
+//        // set redis
+//
+//        //Converting the Object to JSONString
+////        String jsonString = mapper.writeValueAsString(std);
+//        executorService.execute(new RedisOpExecutable("set", "customer:"+id.toString(), mapper.writeValueAsString(customer)));
+////        redisTemplate.opsForValue().set("customer:"+id.toString(), mapper.writeValueAsString(customer), 60, TimeUnit.SECONDS);
+////        redisTemplate.opsForValue().set("customer:"+id.toString(), "{\"id\":1,\"firstName\":\"Jack\",\"lastName\":\"Bauer\"}", 60, TimeUnit.SECONDS);
+//        return mapper.writeValueAsString(customer);
+        if (id.equals(1L)) {
+            Thread.sleep(8000);
+            System.out.println("query takes 8 seconds");
+        } else{
+            System.out.println("took no time");
         }
-        // if redis fails
-        Customer customer = customerRepository.findById(id);
-        // set redis
-
-        //Converting the Object to JSONString
-//        String jsonString = mapper.writeValueAsString(std);
-        executorService.execute(new RedisOpExecutable("set", "customer:"+id.toString(), mapper.writeValueAsString(customer)));
-//        redisTemplate.opsForValue().set("customer:"+id.toString(), mapper.writeValueAsString(customer), 60, TimeUnit.SECONDS);
-//        redisTemplate.opsForValue().set("customer:"+id.toString(), "{\"id\":1,\"firstName\":\"Jack\",\"lastName\":\"Bauer\"}", 60, TimeUnit.SECONDS);
-        return mapper.writeValueAsString(customer);
-//        return "haha";
+        return "haha";
     }
     public void setCustomerDao(Long id) throws InterruptedException{
         ObjectMapper mapper = new ObjectMapper();
@@ -112,7 +119,7 @@ public class LocalCache {
         CustomerLocalCache = Caffeine.newBuilder()
                 .maximumSize(3)
                 .expireAfterWrite(10, TimeUnit.SECONDS)
-                .build(k -> getCustomerDao(k));
+                .buildAsync(k -> getCustomerDao(k));
     }
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext)
